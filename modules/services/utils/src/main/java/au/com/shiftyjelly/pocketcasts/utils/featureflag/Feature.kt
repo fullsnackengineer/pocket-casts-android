@@ -195,7 +195,7 @@ enum class Feature(
     MEDIA3_SESSION(
         key = "media3_session",
         title = "Media3 MediaSession",
-        defaultValue = true,
+        defaultValue = isDebugOrPrototypeBuild,
         tier = FeatureTier.Free,
         hasFirebaseRemoteFlag = true,
         hasDevToggle = true,
@@ -227,9 +227,9 @@ enum class Feature(
     LIVE_ANALYTICS(
         key = "live_analytics",
         title = "Live analytics debugging",
-        defaultValue = isDebugOrPrototypeBuild,
+        defaultValue = true,
         tier = FeatureTier.Free,
-        hasFirebaseRemoteFlag = false,
+        hasFirebaseRemoteFlag = true,
         hasDevToggle = true,
     ),
     PLAYBACK_ERROR_INFO_BAR(
