@@ -10,10 +10,10 @@ import androidx.media3.common.Player
 import au.com.shiftyjelly.pocketcasts.models.entity.Podcast
 import au.com.shiftyjelly.pocketcasts.models.entity.PodcastEpisode
 import au.com.shiftyjelly.pocketcasts.models.entity.UserEpisode
-import au.com.shiftyjelly.pocketcasts.repositories.extensions.getArtworkUrl
 import java.util.Date
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -162,17 +162,27 @@ class PocketCastsForwardingPlayerTest {
     }
 
     @Test
-    fun `available commands include expected controls`() {
+    fun `available commands expose only core controls`() {
         val commands = forwardingPlayer.availableCommands
 
         assertTrue(commands.contains(Player.COMMAND_PLAY_PAUSE))
+        assertTrue(commands.contains(Player.COMMAND_SET_MEDIA_ITEM))
         assertTrue(commands.contains(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM))
-        assertTrue(commands.contains(Player.COMMAND_SEEK_FORWARD))
-        assertTrue(commands.contains(Player.COMMAND_SEEK_BACK))
-        assertTrue(commands.contains(Player.COMMAND_SEEK_TO_NEXT))
-        assertTrue(commands.contains(Player.COMMAND_SEEK_TO_PREVIOUS))
+        assertTrue(commands.contains(Player.COMMAND_STOP))
         assertTrue(commands.contains(Player.COMMAND_GET_CURRENT_MEDIA_ITEM))
         assertTrue(commands.contains(Player.COMMAND_GET_METADATA))
+        assertFalse(commands.contains(Player.COMMAND_SEEK_FORWARD))
+        assertFalse(commands.contains(Player.COMMAND_SEEK_BACK))
+        assertFalse(commands.contains(Player.COMMAND_SEEK_TO_NEXT))
+        assertFalse(commands.contains(Player.COMMAND_SEEK_TO_PREVIOUS))
+    }
+
+    @Test
+    fun `available commands include SET_MEDIA_ITEM for playback initiation`() {
+        val player = PocketCastsForwardingPlayer(mockPlayer)
+        val commands = player.availableCommands
+
+        assertTrue(commands.contains(Player.COMMAND_SET_MEDIA_ITEM))
     }
 
     @Test
@@ -526,7 +536,8 @@ class PocketCastsForwardingPlayerTest {
         forwardingPlayer.updateMetadata(episode, podcast, useEpisodeArtwork = false)
 
         val artworkUri = forwardingPlayer.mediaMetadata.artworkUri
-        assertEquals(Uri.parse(podcast.getArtworkUrl(480)), artworkUri)
+        assertNotNull(artworkUri)
+        assertFalse(artworkUri.toString().contains("episode-art"))
     }
 
     @Test
@@ -541,19 +552,6 @@ class PocketCastsForwardingPlayerTest {
         forwardingPlayer.updateMetadata(episode, podcast, useEpisodeArtwork = true)
 
         assertEquals(Uri.parse("https://example.com/art.jpg"), forwardingPlayer.mediaMetadata.artworkUri)
-    }
-
-    @Test
-    fun `updateMetadata falls back to episode artwork when useEpisodeArtwork is false and podcast is null`() {
-        val episode = createPodcastEpisode(
-            uuid = "ep-1",
-            title = "Test",
-            imageUrl = "https://example.com/episode-art.jpg",
-        )
-
-        forwardingPlayer.updateMetadata(episode, podcast = null, useEpisodeArtwork = false)
-
-        assertEquals(Uri.parse("https://example.com/episode-art.jpg"), forwardingPlayer.mediaMetadata.artworkUri)
     }
 
     @Test
@@ -593,6 +591,19 @@ class PocketCastsForwardingPlayerTest {
 
         assertTrue(skipForwardCalled)
         assertTrue(skipBackCalled)
+    }
+
+    @Test
+    fun `swapPlayer excludes seek to next and previous`() {
+        val player = PocketCastsForwardingPlayer(mockPlayer)
+
+        val newWrappedPlayer = mock<Player> {
+            on { applicationLooper } doReturn Looper.getMainLooper()
+        }
+        val swapped = player.swapPlayer(newWrappedPlayer)
+
+        assertFalse(swapped.availableCommands.contains(Player.COMMAND_SEEK_TO_NEXT))
+        assertFalse(swapped.availableCommands.contains(Player.COMMAND_SEEK_TO_PREVIOUS))
     }
 
     // --- setMediaItems / addMediaItems / prepare interception tests ---

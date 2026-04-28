@@ -5,7 +5,6 @@ import android.os.Looper
 import androidx.annotation.MainThread
 import androidx.annotation.OptIn
 import androidx.media3.common.C
-import androidx.media3.common.FlagSet
 import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.HeartRating
 import androidx.media3.common.MediaItem
@@ -91,10 +90,10 @@ class PocketCastsForwardingPlayer(
         showArtwork: Boolean = true,
         useEpisodeArtwork: Boolean = true,
         artworkData: ByteArray? = null,
+        artworkUri: Uri? = if (showArtwork) resolveArtworkUri(episode, podcast, useEpisodeArtwork) else null,
+        showRating: Boolean = true,
     ) {
         checkMainThread()
-
-        val artworkUri = if (showArtwork) resolveArtworkUri(episode, podcast, useEpisodeArtwork) else null
         val podcastTitle = episode.displaySubtitle(podcast)
 
         val metadataBuilder = MediaMetadata.Builder()
@@ -107,7 +106,7 @@ class PocketCastsForwardingPlayer(
             .setIsBrowsable(false)
             .setIsPlayable(true)
             .setMediaType(MediaMetadata.MEDIA_TYPE_PODCAST_EPISODE)
-            .setUserRating(if (episode is PodcastEpisode) buildRating(episode) else null)
+            .setUserRating(if (showRating && episode is PodcastEpisode) buildRating(episode) else null)
 
         if (showArtwork && artworkData != null) {
             metadataBuilder.setArtworkData(artworkData, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
@@ -132,11 +131,6 @@ class PocketCastsForwardingPlayer(
                 )
             }
         }
-        if (episodeChanged) {
-            dispatchEvents(Player.EVENT_MEDIA_METADATA_CHANGED, Player.EVENT_MEDIA_ITEM_TRANSITION)
-        } else {
-            dispatchEvents(Player.EVENT_MEDIA_METADATA_CHANGED)
-        }
     }
 
     /**
@@ -151,7 +145,6 @@ class PocketCastsForwardingPlayer(
         listeners.forEach { listener ->
             listener.onMediaMetadataChanged(MediaMetadata.EMPTY)
         }
-        dispatchEvents(Player.EVENT_MEDIA_METADATA_CHANGED)
     }
 
     override fun getCurrentMediaItem(): MediaItem = currentMediaItem
@@ -162,11 +155,8 @@ class PocketCastsForwardingPlayer(
         return Player.Commands.Builder()
             .addAll(
                 Player.COMMAND_PLAY_PAUSE,
+                Player.COMMAND_SET_MEDIA_ITEM,
                 Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM,
-                Player.COMMAND_SEEK_FORWARD,
-                Player.COMMAND_SEEK_BACK,
-                Player.COMMAND_SEEK_TO_NEXT,
-                Player.COMMAND_SEEK_TO_PREVIOUS,
                 Player.COMMAND_STOP,
                 Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
                 Player.COMMAND_GET_METADATA,
@@ -285,11 +275,6 @@ class PocketCastsForwardingPlayer(
                 )
             }
         }
-        if (episodeChanged) {
-            dispatchEvents(Player.EVENT_MEDIA_METADATA_CHANGED, Player.EVENT_MEDIA_ITEM_TRANSITION)
-        } else {
-            dispatchEvents(Player.EVENT_MEDIA_METADATA_CHANGED)
-        }
     }
 
     override fun getDuration(): Long {
@@ -322,7 +307,6 @@ class PocketCastsForwardingPlayer(
                         ?: podcast?.getArtworkUrl(480)?.takeIf { it.isNotBlank() }
                 } else {
                     podcast?.getArtworkUrl(480)?.takeIf { it.isNotBlank() }
-                        ?: episode.imageUrl?.takeIf { it.isNotBlank() }
                 }
                 url?.let(Uri::parse)
             }
@@ -335,16 +319,6 @@ class PocketCastsForwardingPlayer(
 
     private fun buildRating(episode: BaseEpisode): HeartRating {
         return HeartRating(episode.isStarred)
-    }
-
-    /**
-     * Dispatches a batched [Player.Events] callback to all listeners.
-     * Media3's notification system reacts to [Player.Listener.onEvents], not
-     * individual callbacks, so this must be called after individual callbacks.
-     */
-    private fun dispatchEvents(vararg eventFlags: @Player.Event Int) {
-        val events = Player.Events(FlagSet.Builder().addAll(*eventFlags).build())
-        listeners.forEach { it.onEvents(this@PocketCastsForwardingPlayer, events) }
     }
 
     private fun checkMainThread() {
