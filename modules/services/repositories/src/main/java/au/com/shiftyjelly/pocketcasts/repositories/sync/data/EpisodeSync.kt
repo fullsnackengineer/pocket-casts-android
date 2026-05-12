@@ -88,17 +88,7 @@ internal class EpisodeSync(
         episodeToFinish.forEach { episode ->
             episodeManager.markedAsPlayedExternally(episode, playbackManager, podcastManager)
         }
-        episodeManager.updateAll(localEpisodes)
-
-        // Update the player position if the current episode was synced and is not playing
-        val currentEpisode = playbackManager.getCurrentEpisode()
-        if (currentEpisode != null && !playbackManager.isPlaying()) {
-            val syncedCurrentEpisode = localEpisodes.find { it.uuid == currentEpisode.uuid }
-            if (syncedCurrentEpisode != null) {
-                val newPositionMs = (syncedCurrentEpisode.playedUpTo * 1000).toInt()
-                playbackManager.seekToTimeMs(newPositionMs)
-            }
-        }
+        episodeManager.updateAllSyncFields(localEpisodes)
     }
 
     private fun PodcastEpisode.applyServerEpisode(
