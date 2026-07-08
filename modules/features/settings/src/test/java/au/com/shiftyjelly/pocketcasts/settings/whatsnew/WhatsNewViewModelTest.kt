@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import au.com.shiftyjelly.pocketcasts.models.type.Subscription
 import au.com.shiftyjelly.pocketcasts.preferences.ReadSetting
 import au.com.shiftyjelly.pocketcasts.preferences.Settings
-import au.com.shiftyjelly.pocketcasts.settings.onboarding.OnboardingUpgradeSource
 import au.com.shiftyjelly.pocketcasts.sharedtest.MainCoroutineRule
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
@@ -58,22 +57,21 @@ class WhatsNewViewModelTest {
     }
 
     @Test
-    fun `free user sees Start Free Trial button`() = runTest {
+    fun `free user sees Got it button when upsell disabled`() = runTest {
         val viewModel = createViewModel(subscription = null)
 
         val state = viewModel.state.value as WhatsNewViewModel.UiState.Loaded
         assertEquals(false, state.feature.isUserEntitled)
-        assertEquals(LR.string.profile_start_free_trial, state.feature.confirmButtonTitle)
+        assertEquals(LR.string.got_it, state.feature.confirmButtonTitle)
     }
 
     @Test
-    fun `free user confirm starts upsell flow`() = runTest {
+    fun `free user confirm force closes when upsell disabled`() = runTest {
         val viewModel = createViewModel(subscription = null)
 
         viewModel.navigationState.test {
             viewModel.onConfirm()
-            val target = awaitItem() as WhatsNewViewModel.NavigationState.StartUpsellFlow
-            assertEquals(OnboardingUpgradeSource.SYNCED_TRANSCRIPTS, target.source)
+            assertEquals(WhatsNewViewModel.NavigationState.ForceClose, awaitItem())
         }
     }
 }

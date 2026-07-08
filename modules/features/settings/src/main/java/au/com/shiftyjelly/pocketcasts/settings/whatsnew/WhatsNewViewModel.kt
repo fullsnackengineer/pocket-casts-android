@@ -38,13 +38,8 @@ class WhatsNewViewModel @Inject constructor(
 
     fun onConfirm() {
         viewModelScope.launch {
-            val feature = (state.value as? UiState.Loaded)?.feature ?: return@launch
-            val target = if (feature.isUserEntitled) {
-                NavigationState.ForceClose
-            } else {
-                NavigationState.StartUpsellFlow(source = OnboardingUpgradeSource.SYNCED_TRANSCRIPTS)
-            }
-            _navigationState.emit(target)
+            // Disabled upsell - only show Plus prompts when user-initiated
+            _navigationState.emit(NavigationState.ForceClose)
         }
     }
 
@@ -75,7 +70,8 @@ class WhatsNewViewModel @Inject constructor(
             override val title = LR.string.synced_transcripts_whats_new_title
             override val message = LR.string.synced_transcripts_whats_new_message
             override val confirmButtonTitle
-                get() = if (isUserEntitled) LR.string.got_it else LR.string.profile_start_free_trial
+                // Disabled upsell - never advertise the trial CTA, only show Plus prompts when user-initiated
+                get() = LR.string.got_it
             override val confirmButtonNote = LR.string.synced_transcripts_whats_new_button_note
             override val subscriptionTier get() = SubscriptionTier.Plus
         }
