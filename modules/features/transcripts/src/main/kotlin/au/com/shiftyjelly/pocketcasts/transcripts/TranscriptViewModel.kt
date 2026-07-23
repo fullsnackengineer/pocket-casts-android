@@ -144,7 +144,7 @@ class TranscriptViewModel @AssistedInject constructor(
             if (transcriptState is TranscriptState.Loaded && transcriptState.transcript is Transcript.Text) {
                 val currentPlayingUuid = playbackManager.getCurrentEpisode()?.uuid
                 if (currentPlayingUuid == episodeUuid) {
-                    fingerprintTimingManager.prepareForCurrentEpisode()
+                    fingerprintTimingManager.prepareForCurrentEpisode(FingerprintTimingManager.PrepareTrigger.TRANSCRIPT_VIEW)
                     _uiState.update { state -> state.copy(syncedState = fingerprintTimingManager.state) }
                     observeSyncedState()
                 }
@@ -418,7 +418,7 @@ class TranscriptViewModel @AssistedInject constructor(
         FingerprintTimingManager.State.Preparing -> "preparing"
         is FingerprintTimingManager.State.Active -> "active"
         is FingerprintTimingManager.State.Failed -> "failed"
-        FingerprintTimingManager.State.Unavailable -> "unavailable"
+        is FingerprintTimingManager.State.Unavailable -> "unavailable"
     }
 
     private suspend fun updateEpisodeMetadata(episodeUuid: String) {
