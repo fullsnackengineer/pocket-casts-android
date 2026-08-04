@@ -12,6 +12,7 @@
         ([#5550](https://github.com/Automattic/pocket-casts-android/pull/5550))
     *   Fix Automotive crash when using Google Assistant voice commands to control playback
         ([#5551](https://github.com/Automattic/pocket-casts-android/pull/5551))
+    *   Fix playback resuming from a stale position after syncing progress from another device
 
 8.16
 -----
