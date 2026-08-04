@@ -73,3 +73,6 @@ developer.properties
 
 # Release build artifacts
 app/release/
+
+# Local scratch / working notes (not tracked)
+scratch/

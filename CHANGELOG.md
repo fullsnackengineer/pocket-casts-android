@@ -1,4 +1,4 @@
-8.17
+8.18
 -----
 *   New Features
     *   Add support for Flightcast transcripts
@@ -6,6 +6,37 @@
     *   Stats Heatmap
         ([#5536](https://github.com/Automattic/pocket-casts-android/pull/5536))
 *   Bug Fixes
+    *   Reduce the chance of episode playback progress reverting during listening history sync
+        ([#5552](https://github.com/Automattic/pocket-casts-android/pull/5552))
+    *   Fix a crash that could occur when seeking during playback
+        ([#5550](https://github.com/Automattic/pocket-casts-android/pull/5550))
+    *   Fix Automotive crash when using Google Assistant voice commands to control playback
+        ([#5551](https://github.com/Automattic/pocket-casts-android/pull/5551))
+    *   Fix playback resuming from a stale position after syncing progress from another device
+
+8.17
+-----
+*   New Features
+    *   Add Audio only playback setting
+        ([#5572](https://github.com/Automattic/pocket-casts-android/pull/5572))
+    *   Add support for Flightcast transcripts
+        ([#5544](https://github.com/Automattic/pocket-casts-android/pull/5544))
+    *   Stats Heatmap
+        ([#5536](https://github.com/Automattic/pocket-casts-android/pull/5536))
+    *   HLS support
+        ([#5602](https://github.com/Automattic/pocket-casts-android/pull/5602))
+    *   Add option to switch to the HLS video stream when playing a downloaded episode
+        ([#5620](https://github.com/Automattic/pocket-casts-android/pull/5620))
+    *   Resolve generated chapter seeks through on-demand audio fingerprinting
+        ([#5613](https://github.com/Automattic/pocket-casts-android/pull/5613))
+*   Updates
+    *   Respect Audio only toggle when playing progressive mp4 episodes
+        ([#5627](https://github.com/Automattic/pocket-casts-android/pull/5627))
+    *   Tap into ExoPlayer's cache instead of a standalone MediaSource for fingerprinting
+        ([#5618](https://github.com/Automattic/pocket-casts-android/pull/5618))
+*   Bug Fixes
+    *   Fix episodes being cached over mobile data when Warn before using data is enabled
+        ([#5567](https://github.com/Automattic/pocket-casts-android/pull/5567))
     *   Reduce the chance of episode playback progress reverting during listening history sync
         ([#5552](https://github.com/Automattic/pocket-casts-android/pull/5552))
     *   Fix a crash that could occur when seeking during playback

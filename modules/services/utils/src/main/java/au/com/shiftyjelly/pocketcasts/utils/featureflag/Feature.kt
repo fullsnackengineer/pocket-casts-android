@@ -351,23 +351,23 @@ enum class Feature(
         hasDevToggle = true,
         addedOn = LocalDate.parse("2026-05-27"),
     ),
-    TRIAL_CTA_COPY_AB_TEST(
-        key = "trial_cta_copy_ab_test",
-        title = "A/B/C test trial CTA button copy",
+    HLS_STREAMING(
+        key = "hls_streaming",
+        title = "Prefer HLS stream when available",
         defaultValue = isDebugOrPrototypeBuild,
         tier = FeatureTier.Free,
         hasFirebaseRemoteFlag = true,
         hasDevToggle = true,
         addedOn = LocalDate.parse("2026-06-11"),
     ),
-    HLS_STREAMING(
-        key = "hls_streaming",
-        title = "Prefer HLS stream when available",
+    STATS_HEATMAP(
+        key = "stats_heatmap",
+        title = "Show listening activity heatmap on Stats",
         defaultValue = isDebugOrPrototypeBuild,
         tier = FeatureTier.Free,
-        hasFirebaseRemoteFlag = false,
+        hasFirebaseRemoteFlag = true,
         hasDevToggle = true,
-        addedOn = LocalDate.parse("2026-06-11"),
+        addedOn = LocalDate.parse("2026-07-02"),
     ),
 }
 

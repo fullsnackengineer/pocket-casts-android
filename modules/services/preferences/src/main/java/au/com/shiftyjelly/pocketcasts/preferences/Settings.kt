@@ -472,6 +472,8 @@ interface Settings {
 
     val freeGiftAcknowledged: UserSetting<Boolean>
 
+    val audioOnly: UserSetting<Boolean>
+
     val cloudSortOrder: UserSetting<CloudSortOrder>
     val cloudAddToUpNext: UserSetting<Boolean>
     val deleteLocalFileAfterPlaying: UserSetting<Boolean>
