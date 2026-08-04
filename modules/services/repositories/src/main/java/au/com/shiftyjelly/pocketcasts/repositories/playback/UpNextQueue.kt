@@ -139,9 +139,15 @@ interface UpNextQueue {
 
     fun updateCurrentEpisodeStateIfNeeded(episodeFromDb: BaseEpisode, state: State) {
         currentEpisode?.let { currentEpisode ->
-            if (episodeFromDb.uuid == currentEpisode.uuid &&
-                episodeFromDb.deselectedChapters.sorted() != currentEpisode.deselectedChapters.sorted()
-            ) {
+            val hasRelevantChange = episodeFromDb.uuid == currentEpisode.uuid && (
+                episodeFromDb.deselectedChapters.sorted() != currentEpisode.deselectedChapters.sorted() ||
+                    episodeFromDb.playedUpToMs != currentEpisode.playedUpToMs ||
+                    episodeFromDb.isStarred != currentEpisode.isStarred ||
+                    episodeFromDb.duration != currentEpisode.duration ||
+                    episodeFromDb.isArchived != currentEpisode.isArchived ||
+                    episodeFromDb.playingStatus != currentEpisode.playingStatus
+                )
+            if (hasRelevantChange) {
                 updateCurrentEpisodeState(state)
             }
         }
