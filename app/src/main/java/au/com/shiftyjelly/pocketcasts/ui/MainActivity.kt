@@ -377,9 +377,14 @@ class MainActivity :
             }
 
             is OnboardingFinish.DoneShowPlusPromotion -> {
-                settings.setHasDoneInitialOnboarding()
-                // Disabled - only show Plus prompts when user-initiated
-                // OnboardingLauncher.openOnboardingFlow(this, OnboardingFlow.Upsell(OnboardingUpgradeSource.FINISHED_ONBOARDING))
+                lifecycleScope.launch {
+                    if (!settings.hasCompletedOnboarding()) {
+                        openLandingTabAfterOnboarding()
+                    }
+                    settings.setHasDoneInitialOnboarding()
+                    // Disabled - only show Plus prompts when user-initiated
+                    // OnboardingLauncher.openOnboardingFlow(this@MainActivity, OnboardingFlow.Upsell(OnboardingUpgradeSource.FINISHED_ONBOARDING))
+                }
             }
 
             is OnboardingFinish.DoneShowWelcomeInReferralFlow -> {
