@@ -74,8 +74,6 @@ class SimplePlayer(
 
     private var hasVideoSurface = false
 
-    private var hasVideoSurface = false
-
     @Volatile
     private var prepared = false
 
