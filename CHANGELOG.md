@@ -1,6 +1,10 @@
-8.20
+8.21
 -----
 
+8.20
+-----
+*   Updates 
+    *   Allow the skip forward and skip back intents to specify a custom number of seconds
 
 8.19
 -----
