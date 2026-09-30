@@ -1,8 +1,5 @@
 package au.com.shiftyjelly.pocketcasts.account.deviceapprove
 
-import au.com.shiftyjelly.pocketcasts.models.type.Subscription
-import au.com.shiftyjelly.pocketcasts.preferences.ReadSetting
-import au.com.shiftyjelly.pocketcasts.preferences.Settings
 import au.com.shiftyjelly.pocketcasts.repositories.sync.SyncManager
 import au.com.shiftyjelly.pocketcasts.sharedtest.MainCoroutineRule
 import com.automattic.eventhorizon.DeviceApproveConnectTappedEvent
@@ -23,7 +20,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import retrofit2.HttpException
@@ -35,12 +31,6 @@ class DeviceApproveViewModelTest {
     val coroutineRule = MainCoroutineRule()
 
     private val syncManager = mock<SyncManager>()
-    private val cachedSubscription = mock<ReadSetting<Subscription?>> {
-        on { value } doReturn null
-    }
-    private val settings = mock<Settings> {
-        on { cachedSubscription } doReturn cachedSubscription
-    }
     private val trackedEvents = mutableListOf<Trackable>()
     private val eventHorizon = EventHorizon { trackedEvents.add(it) }
 
@@ -110,17 +100,6 @@ class DeviceApproveViewModelTest {
     }
 
     @Test
-    fun `upsell is prompted only when the user signed in during pairing`() = runTest {
-        whenever(syncManager.isLoggedIn()).thenReturn(false)
-        val signedOut = createViewModel(userCode = "ABCD12")
-        assertTrue(signedOut.shouldPromptUpsellAfterApproval)
-
-        whenever(syncManager.isLoggedIn()).thenReturn(true)
-        val signedIn = createViewModel(userCode = "ABCD12")
-        assertFalse(signedIn.shouldPromptUpsellAfterApproval)
-    }
-
-    @Test
     fun `refreshAccountState reflects the current login`() = runTest {
         whenever(syncManager.isLoggedIn()).thenReturn(false)
         whenever(syncManager.getEmail()).thenReturn(null)
@@ -136,18 +115,7 @@ class DeviceApproveViewModelTest {
         assertEquals("user@example.com", viewModel.uiState.value.email)
     }
 
-    @Test
-    fun `upsell is not prompted when signing into an existing subscription`() = runTest {
-        whenever(syncManager.isLoggedIn()).thenReturn(false)
-        val subscription = mock<Subscription>()
-        whenever(cachedSubscription.value).thenReturn(subscription)
-
-        val viewModel = createViewModel(userCode = "ABCD12")
-
-        assertFalse(viewModel.shouldPromptUpsellAfterApproval)
-    }
-
-    private fun createViewModel(userCode: String) = DeviceApproveViewModel(syncManager, settings, eventHorizon).apply {
+    private fun createViewModel(userCode: String) = DeviceApproveViewModel(syncManager, eventHorizon).apply {
         setUserCode(userCode)
     }
 

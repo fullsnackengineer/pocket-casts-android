@@ -2,6 +2,8 @@ package au.com.shiftyjelly.pocketcasts.repositories.transcript
 
 import au.com.shiftyjelly.pocketcasts.models.entity.PodcastEpisode
 import au.com.shiftyjelly.pocketcasts.models.entity.Transcript
+import au.com.shiftyjelly.pocketcasts.preferences.Settings
+import au.com.shiftyjelly.pocketcasts.preferences.UserSetting
 import au.com.shiftyjelly.pocketcasts.repositories.fingerprint.FingerprintTimingManager
 import au.com.shiftyjelly.pocketcasts.repositories.playback.PlaybackManager
 import au.com.shiftyjelly.pocketcasts.servers.podcast.TranscriptService
@@ -33,6 +35,12 @@ class TranscriptWindowExtractorTest {
         on { stateFlow } doReturn MutableStateFlow(FingerprintTimingManager.State.Idle)
     }
     private val playbackManager = mock<PlaybackManager>()
+    private val showGeneratedTranscripts = mock<UserSetting<Boolean>> {
+        on { value } doReturn true
+    }
+    private val settings = mock<Settings> {
+        on { showGeneratedTranscripts } doReturn showGeneratedTranscripts
+    }
     private val currentEpisode = PodcastEpisode(uuid = "episode-id", podcastUuid = "podcast-id", publishedDate = Date())
 
     private fun extractor(vtt: String) = TranscriptWindowExtractor(
@@ -46,6 +54,7 @@ class TranscriptWindowExtractorTest {
         },
         fingerprintTimingManager = { fingerprintTimingManager },
         playbackManager = { playbackManager },
+        settings = settings,
     )
 
     @Test
@@ -58,6 +67,17 @@ class TranscriptWindowExtractorTest {
         assertEquals(windowAroundTwentyFive, result?.passage)
         assertEquals(25, result?.referenceTimeSecs)
         assertEquals(0, result?.location)
+    }
+
+    @Test
+    fun `return null when generated transcripts are hidden`() = runTest {
+        whenever(showGeneratedTranscripts.value).thenReturn(false)
+        whenever(fingerprintTimingManager.activeEpisodeUuid).thenReturn("episode-id")
+        whenever(fingerprintTimingManager.referenceTime(5000)).thenReturn(25.0)
+
+        val result = extractor(sampleVtt).extractWindow("episode-id", timeSecs = 5)
+
+        assertNull(result)
     }
 
     @Test

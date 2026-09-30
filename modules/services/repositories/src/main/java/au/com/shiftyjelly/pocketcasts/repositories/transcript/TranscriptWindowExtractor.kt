@@ -2,6 +2,7 @@ package au.com.shiftyjelly.pocketcasts.repositories.transcript
 
 import au.com.shiftyjelly.pocketcasts.models.db.dao.TranscriptDao
 import au.com.shiftyjelly.pocketcasts.models.to.TranscriptEntry
+import au.com.shiftyjelly.pocketcasts.preferences.Settings
 import au.com.shiftyjelly.pocketcasts.repositories.fingerprint.FingerprintTimingManager
 import au.com.shiftyjelly.pocketcasts.repositories.playback.PlaybackManager
 import au.com.shiftyjelly.pocketcasts.servers.podcast.TranscriptService
@@ -34,8 +35,10 @@ class TranscriptWindowExtractor @Inject constructor(
     private val transcriptService: TranscriptService,
     private val fingerprintTimingManager: Lazy<FingerprintTimingManager>,
     private val playbackManager: Lazy<PlaybackManager>,
+    private val settings: Settings,
 ) {
     suspend fun extractWindow(episodeUuid: String, timeSecs: Int): TranscriptWindow? {
+        if (!settings.showGeneratedTranscripts.value) return null
         return try {
             val transcripts = withTimeoutOrNull(1.minutes) {
                 transcriptDao.observeTranscripts(episodeUuid)

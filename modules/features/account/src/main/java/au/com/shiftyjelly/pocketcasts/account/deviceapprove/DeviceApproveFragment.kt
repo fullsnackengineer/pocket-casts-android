@@ -11,7 +11,6 @@ import androidx.fragment.compose.content
 import au.com.shiftyjelly.pocketcasts.compose.CallOnce
 import au.com.shiftyjelly.pocketcasts.settings.onboarding.OnboardingFlow
 import au.com.shiftyjelly.pocketcasts.settings.onboarding.OnboardingLauncher
-import au.com.shiftyjelly.pocketcasts.settings.onboarding.OnboardingUpgradeSource
 import au.com.shiftyjelly.pocketcasts.views.fragments.BaseDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -44,7 +43,7 @@ class DeviceApproveFragment : BaseDialogFragment() {
                     viewModel.onSetupAccountTapped()
                     OnboardingLauncher.openOnboardingFlow(requireActivity(), OnboardingFlow.DeviceApproval)
                 },
-                onDone = ::finishAfterApproval,
+                onDone = ::dismiss,
                 onClose = ::dismiss,
             )
         }
@@ -60,15 +59,6 @@ class DeviceApproveFragment : BaseDialogFragment() {
     override fun onResume() {
         super.onResume()
         viewModel.refreshAccountState()
-    }
-
-    private fun finishAfterApproval() {
-        val activity = requireActivity()
-        val promptUpsell = viewModel.shouldPromptUpsellAfterApproval
-        dismiss()
-        if (promptUpsell) {
-            OnboardingLauncher.openOnboardingFlow(activity, OnboardingFlow.Upsell(OnboardingUpgradeSource.LOGIN_PLUS_PROMOTION))
-        }
     }
 
     companion object {

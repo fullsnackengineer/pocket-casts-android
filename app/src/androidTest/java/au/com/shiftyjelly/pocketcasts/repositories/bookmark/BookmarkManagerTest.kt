@@ -14,6 +14,8 @@ import au.com.shiftyjelly.pocketcasts.preferences.model.BookmarksSortTypeDefault
 import au.com.shiftyjelly.pocketcasts.repositories.fingerprint.FingerprintTimingManager
 import au.com.shiftyjelly.pocketcasts.repositories.playback.PlaybackManager
 import au.com.shiftyjelly.pocketcasts.repositories.sync.SyncManager
+import au.com.shiftyjelly.pocketcasts.preferences.Settings
+import au.com.shiftyjelly.pocketcasts.preferences.UserSetting
 import au.com.shiftyjelly.pocketcasts.repositories.transcript.TranscriptWindowExtractor
 import au.com.shiftyjelly.pocketcasts.servers.podcast.PodcastCacheServiceManager
 import au.com.shiftyjelly.pocketcasts.servers.podcast.TranscriptService
@@ -32,6 +34,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
 class BookmarkManagerTest {
@@ -55,6 +58,9 @@ class BookmarkManagerTest {
                 transcriptService = mock<TranscriptService>(),
                 fingerprintTimingManager = { mock<FingerprintTimingManager>() },
                 playbackManager = { mock<PlaybackManager>() },
+                settings = mock<Settings> {
+                    on { showGeneratedTranscripts } doReturn mock<UserSetting<Boolean>> { on { value } doReturn true }
+                },
             ),
         )
         episodeDao = appDatabase.episodeDao()
