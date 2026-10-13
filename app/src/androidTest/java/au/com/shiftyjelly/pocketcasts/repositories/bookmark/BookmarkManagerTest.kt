@@ -62,6 +62,7 @@ class BookmarkManagerTest {
                     on { showGeneratedTranscripts } doReturn mock<UserSetting<Boolean>> { on { value } doReturn true }
                 },
             ),
+            bookmarkGenerationAnalytics = BookmarkGenerationAnalytics(EventHorizon(TestEventSink())),
         )
         episodeDao = appDatabase.episodeDao()
     }
