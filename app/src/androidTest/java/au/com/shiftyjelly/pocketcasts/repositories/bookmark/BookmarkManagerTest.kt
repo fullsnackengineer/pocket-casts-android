@@ -10,12 +10,12 @@ import au.com.shiftyjelly.pocketcasts.models.di.ModelModule
 import au.com.shiftyjelly.pocketcasts.models.di.addTypeConverters
 import au.com.shiftyjelly.pocketcasts.models.entity.PodcastEpisode
 import au.com.shiftyjelly.pocketcasts.models.type.SyncStatus
+import au.com.shiftyjelly.pocketcasts.preferences.Settings
+import au.com.shiftyjelly.pocketcasts.preferences.UserSetting
 import au.com.shiftyjelly.pocketcasts.preferences.model.BookmarksSortTypeDefault
 import au.com.shiftyjelly.pocketcasts.repositories.fingerprint.FingerprintTimingManager
 import au.com.shiftyjelly.pocketcasts.repositories.playback.PlaybackManager
 import au.com.shiftyjelly.pocketcasts.repositories.sync.SyncManager
-import au.com.shiftyjelly.pocketcasts.preferences.Settings
-import au.com.shiftyjelly.pocketcasts.preferences.UserSetting
 import au.com.shiftyjelly.pocketcasts.repositories.transcript.TranscriptWindowExtractor
 import au.com.shiftyjelly.pocketcasts.servers.podcast.PodcastCacheServiceManager
 import au.com.shiftyjelly.pocketcasts.servers.podcast.TranscriptService
@@ -62,6 +62,7 @@ class BookmarkManagerTest {
                     on { showGeneratedTranscripts } doReturn mock<UserSetting<Boolean>> { on { value } doReturn true }
                 },
             ),
+            bookmarkGenerationAnalytics = BookmarkGenerationAnalytics(EventHorizon(TestEventSink())),
         )
         episodeDao = appDatabase.episodeDao()
     }

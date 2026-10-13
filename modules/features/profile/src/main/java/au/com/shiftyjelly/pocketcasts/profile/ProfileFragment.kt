@@ -19,6 +19,7 @@ import au.com.shiftyjelly.pocketcasts.player.view.bookmark.BookmarksContainerFra
 import au.com.shiftyjelly.pocketcasts.podcasts.view.ProfileEpisodeListFragment
 import au.com.shiftyjelly.pocketcasts.profile.blogs.BlogsFragment
 import au.com.shiftyjelly.pocketcasts.profile.cloud.CloudFilesFragment
+import au.com.shiftyjelly.pocketcasts.profile.whatsnew.WhatsNewFeedFragment
 import au.com.shiftyjelly.pocketcasts.referrals.ReferralsGuestPassFragment
 import au.com.shiftyjelly.pocketcasts.referrals.ReferralsGuestPassFragment.ReferralsPageType
 import au.com.shiftyjelly.pocketcasts.referrals.ReferralsViewModel
@@ -88,7 +89,6 @@ class ProfileFragment :
             },
             onReferralsTooltipClick = {
                 referralsViewModel.onTooltipClick()
-                fragmentHostListener.showBottomSheet(ReferralsGuestPassFragment.newInstance(ReferralsPageType.Send))
             },
             onReferralsTooltipShow = {
                 referralsViewModel.onTooltipShown()
@@ -173,6 +173,7 @@ class ProfileFragment :
     private fun goToSection(section: ProfileSection) {
         profileViewModel.onSectionClick(section)
         val fragment = when (section) {
+            ProfileSection.WhatsNew -> WhatsNewFeedFragment()
             ProfileSection.Stats -> StatsFragment()
             ProfileSection.Downloads -> ProfileEpisodeListFragment.newInstance(ProfileEpisodeListFragment.Mode.Downloaded)
             ProfileSection.CloudFiles -> CloudFilesFragment()

@@ -84,7 +84,6 @@ class SettingsAppearanceViewModel @Inject constructor(
 
     fun updateGlobalIcon(appIconType: AppIcon.AppIconType) {
         appIcon.activeAppIcon = appIconType
-        appIcon.enableSelectedAlias(appIconType)
         eventHorizon.track(
             SettingsAppearanceAppIconChangedEvent(
                 value = appIconType.analyticsValue,

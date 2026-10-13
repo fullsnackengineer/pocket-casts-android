@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.rx2.await
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -80,17 +79,16 @@ class AccountDetailsViewModel @Inject constructor(
     }.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = AccountHeaderState.empty())
 
     internal val recommendedPlanState = signInState.asFlow().map { signInState ->
-    val signedInState = signInState as? SignInState.SignedIn
-    val isExpiring = signedInState?.subscription?.isExpiring == true
+        val signedInState = signInState as? SignInState.SignedIn
+        val isExpiring = signedInState?.subscription?.isExpiring == true
 
-    if (!signInState.isSignedInAsFree && !isExpiring) {
+        if (!signInState.isSignedInAsFree && !isExpiring) {
+            return@map null
+        }
+
+        // Disabled automatic upgrade banner - only show Plus prompts when user-initiated
         return@map null
-    }
-
-    // Disabled automatic upgrade banner - only show Plus prompts when user-initiated
-    return@map null
-
-}.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
+    }.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
 
     internal val sectionsState = combine(
         signInState.asFlow(),
@@ -143,7 +141,7 @@ class AccountDetailsViewModel @Inject constructor(
     fun deleteAccount() {
         viewModelScope.launch {
             try {
-                val response = withContext(Dispatchers.IO) { syncManager.deleteAccountRxSingle().await() }
+                val response = withContext(Dispatchers.IO) { syncManager.deleteAccount() }
                 val success = response.success ?: false
                 deleteAccountState.value = if (success) {
                     DeleteAccountState.Success("OK")
