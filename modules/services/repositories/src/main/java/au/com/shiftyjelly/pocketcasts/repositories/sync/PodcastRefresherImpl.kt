@@ -55,7 +55,8 @@ class PodcastRefresherImpl @Inject constructor(
                     if (newEpisode.sizeInBytes > 0 && !existingEpisode.isDownloaded) {
                         existingEpisode.sizeInBytes = newEpisode.sizeInBytes
                     }
-                    if (newEpisode.duration != 0.0) {
+                    // after downloading an episode the player's measured duration is more accurate than the feed XML duration
+                    if (newEpisode.duration != 0.0 && !existingEpisode.isDownloaded) {
                         existingEpisode.duration = newEpisode.duration
                     }
                     existingEpisode.publishedDate = newEpisode.publishedDate

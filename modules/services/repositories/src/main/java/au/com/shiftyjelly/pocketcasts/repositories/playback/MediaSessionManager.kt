@@ -69,8 +69,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.rx2.asFlow
 import kotlinx.coroutines.rx2.asObservable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -287,6 +289,17 @@ class MediaSessionManager(
 
             combine(upNextQueueChanges, settings.artworkConfiguration.flow) { queueState, artworkConfiguration -> queueState to artworkConfiguration }
                 .onEach { (queueState, artworkConfiguration) -> updateUpNext(queueState, artworkConfiguration.useEpisodeArtwork) }
+                .catch { Timber.e(it) }
+                .launchIn(this.scope)
+
+            // The player learns the real duration after the metadata is first published, so publish it again when it changes.
+            playbackManager.playbackStateRelay.asFlow()
+                .map { playbackState -> playbackState.episodeUuid to playbackState.durationMs }
+                .distinctUntilChanged()
+                .onEach {
+                    val episode = playbackManager.getCurrentEpisode() ?: return@onEach
+                    updateMetadata(episode, settings.artworkConfiguration.value.useEpisodeArtwork)
+                }
                 .catch { Timber.e(it) }
                 .launchIn(this.scope)
         }
@@ -1152,10 +1165,11 @@ class MediaSessionManager(
 
         val podcastTitle = episode.displaySubtitle(podcast)
         val safeCharacterPodcastTitle = podcastTitle.replace("%", "pct")
+        val durationMs = metadataDurationMs(episode, playbackManager.playbackStateRelay.blockingFirst())
         var nowPlayingBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, episode.uuid)
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, safeCharacterPodcastTitle)
-            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, episode.durationMs.toLong())
+            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, durationMs)
             .putString(MediaMetadataCompat.METADATA_KEY_GENRE, "Podcast")
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, episode.title)
 
@@ -1167,7 +1181,7 @@ class MediaSessionManager(
             nowPlayingBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, podcast.author)
         }
 
-        Timber.i("MediaSession metadata. Episode: ${episode.uuid} ${episode.title} Duration: ${episode.durationMs.toLong()}")
+        Timber.i("MediaSession metadata. Episode: ${episode.uuid} ${episode.title} Duration: $durationMs")
 
         if (settings.showArtworkOnLockScreen.value) {
             val bitmapUri = AutoConverter.getPodcastArtworkUri(podcast, episode, context, useEpisodeArtwork)?.toString()
@@ -1531,6 +1545,15 @@ internal const val APP_ACTION_MARK_AS_PLAYED = "markAsPlayed"
 internal const val APP_ACTION_CHANGE_SPEED = "changeSpeed"
 internal const val APP_ACTION_ARCHIVE = "archive"
 internal const val APP_ACTION_PLAY_NEXT = "playNext"
+
+/**
+ * The player's duration is what the playback position is measured against, so prefer it over the episode's stored duration,
+ * which can still hold the feed's value. The player has no duration until the stream loads, so fall back to the episode's.
+ */
+internal fun metadataDurationMs(episode: BaseEpisode, playbackState: PlaybackState): Long {
+    val playerDurationMs = playbackState.durationMs.takeIf { playbackState.episodeUuid == episode.uuid && it > 0 }
+    return (playerDurationMs ?: episode.durationMs).toLong()
+}
 
 private val NOTHING_PLAYING: MediaMetadataCompat = MediaMetadataCompat.Builder()
     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "")
