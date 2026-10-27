@@ -691,6 +691,12 @@ class SettingsImpl @Inject constructor(
         sharedPrefs = sharedPreferences,
     )
 
+    override val showWhatsNewDot: UserSetting<Boolean> = UserSetting.BoolPref(
+        sharedPrefKey = "showWhatsNewDot",
+        defaultValue = true,
+        sharedPrefs = sharedPreferences,
+    )
+
     override val autoDownloadUnmeteredOnly = UserSetting.BoolPref(
         sharedPrefKey = "autoDownloadOnlyDownloadOnWifi",
         defaultValue = true,
@@ -1607,12 +1613,6 @@ class SettingsImpl @Inject constructor(
         editor.putBoolean(Settings.AUTOMOTIVE_CONNECTED_TO_MEDIA_SESSION, isLoaded)
         editor.apply()
     }
-
-    override val showReferralsTooltip: UserSetting<Boolean> = UserSetting.BoolPref(
-        sharedPrefKey = Settings.SHOW_REFERRALS_TOOLTIP,
-        defaultValue = true,
-        sharedPrefs = sharedPreferences,
-    )
 
     override val showSmartBookmarksTooltip: UserSetting<Boolean> = UserSetting.BoolPref(
         sharedPrefKey = Settings.SHOW_SMART_BOOKMARKS_TOOLTIP,
