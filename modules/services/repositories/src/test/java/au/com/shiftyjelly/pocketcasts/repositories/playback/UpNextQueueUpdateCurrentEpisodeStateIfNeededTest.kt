@@ -8,6 +8,8 @@ import au.com.shiftyjelly.pocketcasts.preferences.model.AutoPlaySource
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import java.util.Date
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.rx2.asFlow
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -147,6 +149,7 @@ class UpNextQueueUpdateCurrentEpisodeStateIfNeededTest {
 
         override val isEmpty: Boolean get() = false
         override val changesObservable: Observable<UpNextQueue.State> = stateSubject
+        override val changesFlow: Flow<UpNextQueue.State> = stateSubject.asFlow()
         override val currentEpisode: BaseEpisode?
             get() = (stateSubject.value as? UpNextQueue.State.Loaded)?.episode
         override val queueEpisodes: List<BaseEpisode> get() = emptyList()
