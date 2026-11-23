@@ -43,7 +43,7 @@ class CloudSettingsViewModel @Inject constructor(
         settings.cloudDownloadOnlyOnWifi.flow,
         userManager.getSignInState().asFlow(),
         isUpgradeBannerDismissed,
-        transform = { addToUpNext, deleteLocal, deleteCloud, autoUpload, autoDownload, onlyOnWifi, signInState, bannerDismissed ->
+        transform = { addToUpNext, deleteLocal, deleteCloud, autoUpload, autoDownload, onlyOnWifi, signInState, _ ->
             val isSignedInAsPlusOrPatron = signInState.isSignedInAsPlusOrPatron
             UiState(
                 cloudAddToUpNext = addToUpNext,
@@ -53,7 +53,8 @@ class CloudSettingsViewModel @Inject constructor(
                 cloudAutoDownload = autoDownload,
                 cloudDownloadOnlyOnWifi = onlyOnWifi,
                 isSignedInAsPlusOrPatron = isSignedInAsPlusOrPatron,
-                isUpgradeBannerVisible = !isSignedInAsPlusOrPatron && !bannerDismissed,
+                // Disabled automatic upgrade banner - only show Plus prompts when user-initiated
+                isUpgradeBannerVisible = false,
             )
         },
     ).stateIn(

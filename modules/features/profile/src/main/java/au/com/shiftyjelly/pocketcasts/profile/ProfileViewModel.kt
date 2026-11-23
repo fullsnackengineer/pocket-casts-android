@@ -3,6 +3,7 @@ package au.com.shiftyjelly.pocketcasts.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import au.com.shiftyjelly.pocketcasts.analytics.SourceView
+import au.com.shiftyjelly.pocketcasts.endofyear.playback2026.Playback2026
 import au.com.shiftyjelly.pocketcasts.models.to.RefreshState
 import au.com.shiftyjelly.pocketcasts.models.type.SignInState
 import au.com.shiftyjelly.pocketcasts.preferences.Settings
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -133,6 +135,17 @@ class ProfileViewModel @Inject constructor(
         initialValue = false,
     )
 
+    internal val isPlayback2026Available = flow {
+        while (true) {
+            emit(endOfYearManager.isEligibleForEndOfYear(Playback2026.YEAR))
+            delay(10_000)
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = false,
+    )
+
     internal val isFreeAccountBannerVisible = combine(
         signInState.map { it.isSignedIn },
         settings.isFreeAccountProfileBannerDismissed.flow,
@@ -146,10 +159,8 @@ class ProfileViewModel @Inject constructor(
 
     internal val refreshState = settings.refreshStateFlow
 
-    internal val showUpgradeBanner = combine(
-        settings.upgradeProfileClosed.flow,
-        signInState.map { it.isSignedInAsPlusOrPatron },
-    ) { closedClicked, isPlusOrPatron -> !closedClicked && !isPlusOrPatron }
+    // Disabled automatic upgrade banner - only show Plus prompts when user-initiated
+    internal val showUpgradeBanner = flowOf(false)
 
     internal val miniPlayerInset = settings.bottomInset.stateIn(
         scope = viewModelScope,

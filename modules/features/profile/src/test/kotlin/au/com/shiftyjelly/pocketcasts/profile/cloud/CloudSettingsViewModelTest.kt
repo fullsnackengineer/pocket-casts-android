@@ -177,9 +177,9 @@ class CloudSettingsViewModelTest {
     }
 
     @Test
-    fun `isUpgradeBannerVisible is true when not Plus or Patron and not previously dismissed`() = runTest {
+    fun `isUpgradeBannerVisible is false when not Plus or Patron and not previously dismissed`() = runTest {
         createViewModel().uiState.test {
-            assertTrue(awaitItem().isUpgradeBannerVisible)
+            assertFalse(awaitItem().isUpgradeBannerVisible)
         }
     }
 
@@ -206,16 +206,8 @@ class CloudSettingsViewModelTest {
     }
 
     @Test
-    fun `onUpgradeBannerDismissed persists the setting, hides the banner, and tracks the event`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.uiState.test {
-            assertTrue(awaitItem().isUpgradeBannerVisible)
-
-            viewModel.onUpgradeBannerDismissed(SourceView.FILES_SETTINGS)
-
-            assertFalse(awaitItem().isUpgradeBannerVisible)
-        }
+    fun `onUpgradeBannerDismissed persists the setting and tracks the event`() = runTest {
+        createViewModel().onUpgradeBannerDismissed(SourceView.FILES_SETTINGS)
 
         verify(settings).setUpgradeClosedCloudSettings(true)
         assertEquals(
